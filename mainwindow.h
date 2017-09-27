@@ -19,6 +19,7 @@ public:
 private:
     Ui::MainWindow *ui;
     Database m_db;
+    QSqlTableModel *model;
 };
 
 #endif // MAINWINDOW_H
