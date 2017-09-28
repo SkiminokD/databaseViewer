@@ -15,12 +15,16 @@ class Database : public QObject
 public:
     explicit Database(QObject *parent = nullptr);
 
-    QSqlError init();
-protected:
-    const QString m_hostname {"localhost"};
-    const QString m_dbname   {"inobitec"};
-    const int     m_port     {5432};
-    const QString m_username {"postgres"};
+    QSqlError init(QString hostname = defaultHostname,
+                   int port = defaultPort,
+                   QString username = defaultUsername,
+                   QString password = defaultPassword);
+public:
+    static const char defaultHostname[];
+    static const char defaultDatabaseName[];
+    static const int  defaultPort;
+    static const char defaultUsername[];
+    static const char defaultPassword[];
 };
 
 #endif // DATABASE_H
