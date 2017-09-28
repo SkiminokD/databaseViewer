@@ -21,9 +21,6 @@ private:
     Ui::MainWindow *ui;
     Database m_db;
     ChannelTableModel *model;
-
-protected slots:
-    void delRow(int index);
 };
 
 #endif // MAINWINDOW_H

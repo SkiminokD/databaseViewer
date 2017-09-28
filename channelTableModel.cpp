@@ -33,3 +33,10 @@ void ChannelTableModel::insertDefaultRow()
     emit endInsertRows();
     select(); //Обновить кэш
 }
+
+void ChannelTableModel::removeRowImmediately(int index)
+{
+    if(!removeRow(index))
+        qDebug()<<"Error while removing"<<lastError();
+    submitAll();
+}

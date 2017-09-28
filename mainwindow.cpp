@@ -21,18 +21,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->view,&ChannelTableView::addDefaultRow,
             model,&ChannelTableModel::insertDefaultRow);
     connect(ui->view,&ChannelTableView::removeRow,
-            this,&MainWindow::delRow);
+            model,&ChannelTableModel::removeRowImmediately);
 }
 
 MainWindow::~MainWindow()
 {
     delete model;
     delete ui;
-}
-
-void MainWindow::delRow(int index)
-{
-    if(!model->removeRow(index))
-        qDebug()<<"Error while removing"<<model->lastError();
-    model->submitAll();
 }

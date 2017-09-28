@@ -11,6 +11,7 @@ public:
 
 public slots:
     void insertDefaultRow();
+    void removeRowImmediately(int index);
 };
 
 #endif // CHANNELTABLEMODEL_H
