@@ -20,6 +20,10 @@ private:
     Ui::MainWindow *ui;
     Database m_db;
     QSqlTableModel *model;
+
+protected slots:
+    void addRow();
+    void delRow();
 };
 
 #endif // MAINWINDOW_H

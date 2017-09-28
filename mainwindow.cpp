@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,10 +32,37 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView->setColumnHidden(model->fieldIndex("id"), true);
     ui->tableView->setItemDelegate(new QSqlRelationalDelegate(ui->tableView));
     ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    connect(ui->btnAdd,&QPushButton::clicked,this,&MainWindow::addRow);
+    connect(ui->btnRemove,&QPushButton::clicked,this,&MainWindow::delRow);
 }
 
 MainWindow::~MainWindow()
 {
     delete model;
     delete ui;
+}
+
+void MainWindow::addRow()
+{
+    int index = model->rowCount()+1;
+    /* FIXME: Стандартные средства insertRow и insertRecord не в состоянии заполнить
+    /* таблицу дефолтными значениями */
+    QSqlRecord record = model->record();
+    record.setValue("id",index);
+    record.setValue("name", "Channel "+QString::number(index));
+    record.setValue("protocol", "RTSP");
+    record.setValue("port",80);
+    record.setValue("lastStartTime", QDateTime::currentDateTime());
+
+    if(!model->insertRecord(-1,record))
+        qDebug()<<"Error while insert"<<model->lastError();
+    model->submitAll();
+}
+
+void MainWindow::delRow()
+{
+    if(!model->removeRow(ui->tableView->currentIndex().row()))
+        qDebug()<<"Error while removing"<<model->lastError();
+    model->submitAll();
 }
