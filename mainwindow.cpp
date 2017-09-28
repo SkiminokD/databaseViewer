@@ -15,15 +15,13 @@ MainWindow::MainWindow(QWidget *parent) :
         return;
     }
 
-    model = new ChannelTableModel(ui->tableView);
+    model = new ChannelTableModel(this);
+    ui->view->setModel(model, model->fieldIndex("id"));
 
-    ui->tableView->setModel(model);
-    ui->tableView->setColumnHidden(model->fieldIndex("id"), true);
-    ui->tableView->setItemDelegate(new QSqlRelationalDelegate(ui->tableView));
-    ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-
-    connect(ui->btnAdd,&QPushButton::clicked,model,&ChannelTableModel::insertDefaultRow);
-    connect(ui->btnRemove,&QPushButton::clicked,this,&MainWindow::delRow);
+    connect(ui->view,&ChannelTableView::addDefaultRow,
+            model,&ChannelTableModel::insertDefaultRow);
+    connect(ui->view,&ChannelTableView::removeRow,
+            this,&MainWindow::delRow);
 }
 
 MainWindow::~MainWindow()
@@ -32,9 +30,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::delRow()
+void MainWindow::delRow(int index)
 {
-    if(!model->removeRow(ui->tableView->currentIndex().row()))
+    if(!model->removeRow(index))
         qDebug()<<"Error while removing"<<model->lastError();
     model->submitAll();
 }

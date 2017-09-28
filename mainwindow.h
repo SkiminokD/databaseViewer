@@ -23,7 +23,7 @@ private:
     ChannelTableModel *model;
 
 protected slots:
-    void delRow();
+    void delRow(int index);
 };
 
 #endif // MAINWINDOW_H
