@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     model->setHeaderData(model->fieldIndex("id"), Qt::Horizontal, tr("ID Канала"));
     model->setHeaderData(model->fieldIndex("name"), Qt::Horizontal, tr("Имя канала"));
     model->setHeaderData(model->fieldIndex("address"), Qt::Horizontal, tr("Aдрес"));
+    model->setHeaderData(model->fieldIndex("port"), Qt::Horizontal, tr("Порт"));
     model->setHeaderData(model->fieldIndex("protocol"), Qt::Horizontal, tr("Протокол"));
     model->setHeaderData(model->fieldIndex("login"), Qt::Horizontal, tr("Логин"));
     model->setHeaderData(model->fieldIndex("password"), Qt::Horizontal, tr("Пароль"));
