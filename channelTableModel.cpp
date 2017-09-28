@@ -24,7 +24,8 @@ void ChannelTableModel::insertDefaultRow()
         qDebug()<<"Insert error"<<query.lastError().text();
     }
     emit endInsertRows();
-    select(); //Обновить кэш
+    //Обновить кэш
+    select(); //WARN: Снижение производительности
 }
 
 void ChannelTableModel::removeRowImmediately(int index)
@@ -32,4 +33,6 @@ void ChannelTableModel::removeRowImmediately(int index)
     if(!removeRow(index))
         qDebug()<<"Error while removing"<<lastError();
     submitAll();
+    //Обновить кэш
+    select(); //WARN: Снижение производительности
 }
