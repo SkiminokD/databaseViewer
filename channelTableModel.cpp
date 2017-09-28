@@ -15,7 +15,7 @@ ChannelTableModel::ChannelTableModel(QObject *parent):
 
 void ChannelTableModel::insertDefaultRow()
 {
-    emit beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
     QSqlQuery query(database());
     QString request = "INSERT INTO channels DEFAULT VALUES";
     query.prepare(request);
@@ -23,7 +23,7 @@ void ChannelTableModel::insertDefaultRow()
     {
         qDebug()<<"Insert error"<<query.lastError().text();
     }
-    emit endInsertRows();
+    endInsertRows();
     //Обновить кэш
     select(); //WARN: Снижение производительности
 }
