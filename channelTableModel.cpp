@@ -17,9 +17,7 @@ void ChannelTableModel::insertDefaultRow()
 {
     emit beginInsertRows(QModelIndex(), rowCount(), rowCount());
     QSqlQuery query(database());
-    QString request = "INSERT INTO \"channels\" "
-            "(id, name, address, protocol, port, login, password, \"lastStartTime\") "
-            "VALUES (default,default,default,default,default,default,default,default)";
+    QString request = "INSERT INTO channels DEFAULT VALUES";
     query.prepare(request);
     if(!query.exec())
     {
