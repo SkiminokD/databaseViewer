@@ -23,8 +23,8 @@ ALTER TABLE channel_index OWNER TO postgres;
 
 -- channels table
 CREATE TABLE channels (
-    "id" integer NOT NULL,
-    "name" text DEFAULT ('Channel '::text || nextval('channel_index'::regclass)),
+    "id" integer DEFAULT nextval('channel_index'::regclass) NOT NULL,
+    "name" text DEFAULT 'Channel '::text,
     "address" text DEFAULT '...'::text,     --IP address or DNS-name
     "protocol" text DEFAULT 'RTSP' NOT NULL,
     "port" integer DEFAULT 80 NOT NULL,
