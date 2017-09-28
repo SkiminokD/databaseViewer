@@ -28,5 +28,6 @@ void ChannelTableView::setModel(QAbstractItemModel *model, int idColumn)
 
 void ChannelTableView::handleRemoveButtonClick()
 {
-    emit removeRow(ui->tableView->currentIndex().row());
+    if(ui->tableView->currentIndex().isValid())
+        emit removeRow(ui->tableView->currentIndex().row());
 }
