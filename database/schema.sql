@@ -24,7 +24,7 @@ ALTER TABLE channel_index OWNER TO postgres;
 -- channels table
 CREATE TABLE channels (
     "id" integer DEFAULT nextval('channel_index'::regclass) NOT NULL,
-    "name" text DEFAULT 'Channel '::text,
+    "name" text DEFAULT ''::text,
     "address" text DEFAULT '...'::text,     --IP address or DNS-name
     "protocol" text DEFAULT 'RTSP' NOT NULL,
     "port" integer DEFAULT 80 NOT NULL,
@@ -35,6 +35,20 @@ CREATE TABLE channels (
 
 ALTER SEQUENCE channel_index OWNED BY channels."id";
 ALTER TABLE channels OWNER TO postgres;
+
+-- generate defaul channel name
+CREATE OR REPLACE FUNCTION channel_insert() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF (NEW.name = '') THEN
+        NEW.name := 'Channel '::text||NEW.id;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trig_channel_insert BEFORE INSERT OR UPDATE ON channels FOR EACH ROW EXECUTE PROCEDURE channel_insert();
 
 ALTER TABLE ONLY channels
     ADD CONSTRAINT "channelID" PRIMARY KEY ("id");
