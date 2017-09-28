@@ -8,13 +8,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QSqlError err = m_db.init();
-    if(err.type() != QSqlError::NoError)
-    {
-        qDebug()<<"Error"<<err;
-        return;
-    }
-
     model = new ChannelTableModel(this);
     ui->view->setModel(model, model->fieldIndex("id"));
 

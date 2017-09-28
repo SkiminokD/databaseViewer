@@ -28,14 +28,17 @@ SOURCES += \
         mainwindow.cpp \
         database.cpp \
         channelTableModel.cpp \
-    channelTableView.cpp
+        channelTableView.cpp \
+        authentication.cpp
 
 HEADERS += \
         mainwindow.h \
         database.h \
         channelTableModel.h \
-    channelTableView.h
+        channelTableView.h \
+        authentication.h
 
 FORMS += \
         mainwindow.ui \
-    channelTableView.ui
+        channelTableView.ui \
+        authentication.ui

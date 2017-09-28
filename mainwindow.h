@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "database.h"
 #include "channelTableModel.h"
 
 namespace Ui {
@@ -19,7 +18,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    Database m_db;
     ChannelTableModel *model;
 };
 
