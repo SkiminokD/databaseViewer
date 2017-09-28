@@ -12,6 +12,19 @@ public:
 public slots:
     void insertDefaultRow();
     void removeRowImmediately(int index);
+
+private:
+    const QMap<const char*, QString> m_fields
+    {
+        {"id",           tr("ID Канала")},
+        {"name",         tr("Имя канала")},
+        {"address",      tr("Aдрес")},
+        {"port",         tr("Порт")},
+        {"protocol",     tr("Протокол")},
+        {"login",        tr("Логин")},
+        {"password",     tr("Пароль")},
+        {"lastStartTime",tr("Последнее время запуска")},
+    };
 };
 
 #endif // CHANNELTABLEMODEL_H

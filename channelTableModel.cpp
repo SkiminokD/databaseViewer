@@ -5,15 +5,10 @@ ChannelTableModel::ChannelTableModel(QObject *parent):
 {
     setEditStrategy(QSqlTableModel::OnFieldChange);
     setTable("channels");
-    setHeaderData(fieldIndex("id"),       Qt::Horizontal, tr("ID Канала"));
-    setHeaderData(fieldIndex("name"),     Qt::Horizontal, tr("Имя канала"));
-    setHeaderData(fieldIndex("address"),  Qt::Horizontal, tr("Aдрес"));
-    setHeaderData(fieldIndex("port"),     Qt::Horizontal, tr("Порт"));
-    setHeaderData(fieldIndex("protocol"), Qt::Horizontal, tr("Протокол"));
-    setHeaderData(fieldIndex("login"),    Qt::Horizontal, tr("Логин"));
-    setHeaderData(fieldIndex("password"), Qt::Horizontal, tr("Пароль"));
-    setHeaderData(fieldIndex("lastStartTime"), Qt::Horizontal,
-                                               tr("Последнее время запуска"));
+    for(auto field: m_fields.keys())
+    {
+        setHeaderData(fieldIndex(field), Qt::Horizontal, m_fields.value(field));
+    }
     setSort(fieldIndex("id"),Qt::AscendingOrder);
     select();
 }
