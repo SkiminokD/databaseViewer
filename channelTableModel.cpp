@@ -1,4 +1,5 @@
 #include "channelTableModel.h"
+#include "debug.h"
 
 ChannelTableModel::ChannelTableModel(QObject *parent):
     QSqlTableModel(parent)
@@ -21,7 +22,7 @@ void ChannelTableModel::insertDefaultRow()
     query.prepare(request);
     if(!query.exec())
     {
-        qDebug()<<"Insert error"<<query.lastError().text();
+        PRINT_CRITICAL("Insert error:"+query.lastError().text());
     }
     endInsertRows();
     //Обновить кэш
@@ -31,7 +32,7 @@ void ChannelTableModel::insertDefaultRow()
 void ChannelTableModel::removeRowImmediately(int index)
 {
     if(!removeRow(index))
-        qDebug()<<"Error while removing"<<lastError();
+        PRINT_CRITICAL("Error while removing: "+lastError().text());
     submitAll();
     //Обновить кэш
     select(); //WARN: Снижение производительности

@@ -36,7 +36,8 @@ HEADERS += \
         database.h \
         channelTableModel.h \
         channelTableView.h \
-        authentication.h
+        authentication.h \
+        debug.h
 
 FORMS += \
         mainwindow.ui \

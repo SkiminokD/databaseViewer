@@ -2,6 +2,7 @@
 #include "ui_authentication.h"
 #include "database.h"
 #include <QDialogButtonBox>
+#include "debug.h"
 
 Authentication::Authentication(QWidget *parent) :
     QDialog(parent),
@@ -29,13 +30,13 @@ void Authentication::ok()
     case QSqlError::ConnectionError:
         ui->lblStatus->setText(tr("Ошибка подключения. "
                                   "Пожалуйста проверьте введенные данные."));
-        qDebug()<<"Connection error:"<<error.text();
+        PRINT_CRITICAL("Connection error:"+error.text());
         break;
     case QSqlError::NoError:
         done(DialogCode::Accepted);
         break;
     default:
         ui->lblStatus->setText(tr("Неизвестная ошибка"));
-        qDebug()<<"Unknown error:"<<error.text();
+        PRINT_CRITICAL("Unknown error:"+error.text());
     }
 }
