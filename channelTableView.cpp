@@ -31,6 +31,9 @@ void ChannelTableView::setModel(QAbstractItemModel *model, int idColumn)
 {
     ui->tableView->setModel(model);
     ui->tableView->setColumnHidden(idColumn, true);
+
+    connect(model,&QAbstractItemModel::rowsInserted,
+            ui->tableView, &QTableView::scrollToBottom);
 }
 
 void ChannelTableView::handleRemoveButtonClick()
