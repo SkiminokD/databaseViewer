@@ -20,6 +20,13 @@ ChannelTableView::~ChannelTableView()
     delete ui;
 }
 
+//!
+//! \brief ChannelTableView::setModel
+//! Устанавливает модель для вида
+//!
+//! \param model - собственно модель
+//! \param idColumn - номер столбца идентификаторов для скрытия
+//!
 void ChannelTableView::setModel(QAbstractItemModel *model, int idColumn)
 {
     ui->tableView->setModel(model);
