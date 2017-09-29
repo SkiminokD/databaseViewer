@@ -19,8 +19,9 @@ public:
     void setModel(QAbstractItemModel *model, int idColumn);
 private:
     Ui::ChannelTableView *ui;
-public slots:
+protected slots:
     void handleRemoveButtonClick();
+public:
 signals:
     void addDefaultRow();
     void removeRow(int index);
