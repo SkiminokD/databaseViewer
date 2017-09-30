@@ -28,9 +28,12 @@ QVariant ProxyFetchModel::headerData(int section,
                                      Qt::Orientation orientation,
                                      int role) const
 {
-    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+    if (role == Qt::DisplayRole)
     {
-        return QVariant(m_headers.value(static_cast<Column>(section),""));
+        if(orientation == Qt::Horizontal)
+            return QVariant(m_headers.value(static_cast<Column>(section),""));
+        if(orientation == Qt::Vertical)
+            return QVariant(section+1);
     }
 
     return QVariant();
