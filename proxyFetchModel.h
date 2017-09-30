@@ -10,6 +10,7 @@ class ProxyFetchModel : public QAbstractTableModel
 
 public:
     explicit ProxyFetchModel(QObject *parent = nullptr);
+    virtual ~ProxyFetchModel();
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation,

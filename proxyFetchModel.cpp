@@ -8,6 +8,19 @@ ProxyFetchModel::ProxyFetchModel(QObject *parent)
     select();
 }
 
+ProxyFetchModel::~ProxyFetchModel()
+{
+    QSqlQuery query(m_db);
+    if(!query.exec("CLOSE chcursor"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+    }
+    if(!query.exec("COMMIT WORK"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+    }
+}
+
 bool ProxyFetchModel::select()
 {
     QSqlQuery query(m_db);
@@ -19,6 +32,15 @@ bool ProxyFetchModel::select()
     if(query.first())
     {
         m_rowCount = query.value(0).toLongLong();
+    }
+    if(!query.exec("BEGIN WORK"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+    }
+    if(!query.exec("DECLARE chcursor SCROLL CURSOR FOR "
+                   "SELECT * FROM channels ORDER BY id"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
     }
     return true;
 }
@@ -59,7 +81,22 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    // FIXME: Implement me!
+    if (role == Qt::DisplayRole || role == Qt::EditRole)
+    {
+        QSqlQuery query(m_db);
+        QString request = "FETCH ABSOLUTE %0 FROM chcursor";
+        if(!query.exec(request.arg(index.row()+1)))
+        {
+            PRINT_CRITICAL(query.lastError().text());
+            PRINT_CRITICAL(query.executedQuery());
+            return QVariant();
+        }
+        if(query.first())
+        {
+            return QVariant(query.value(index.column()));
+        }
+    }
+
     return QVariant();
 }
 
