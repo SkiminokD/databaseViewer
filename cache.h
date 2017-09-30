@@ -1,23 +1,22 @@
 #ifndef CACHE_H
 #define CACHE_H
 
-#include <QQueue>
+#include <QList>
 
 template <class T>
-class Cache : public QQueue<T>
+class Cache : public QList<T>
 {
 public:
     void setMaxSize(int value);
-    inline void enqueue(const T &t);
+    inline void append(const T &t);
 protected:
     int m_maxSize {10};
 
-    using QQueue<T>::append;
-    using QQueue<T>::insert;
-    using QQueue<T>::operator +;
-    using QQueue<T>::operator +=;
-    using QQueue<T>::push_back;
-    using QQueue<T>::push_front;
+    using QList<T>::insert;
+    using QList<T>::operator +;
+    using QList<T>::operator +=;
+    using QList<T>::push_back;
+    using QList<T>::push_front;
 };
 
 template<class T>
@@ -27,11 +26,11 @@ void Cache<T>::setMaxSize(int value)
 }
 
 template<class T>
-void Cache<T>::enqueue(const T &t)
+void Cache<T>::append(const T &t)
 {
-    if(QQueue<T>::size()+1 > m_maxSize)
-        QQueue<T>::dequeue();
-    QQueue<T>::enqueue(t);
+    if(QList<T>::size()+1 > m_maxSize)
+        QList<T>::takeFirst();
+    QList<T>::append(t);
 }
 
 #endif // CACHE_H

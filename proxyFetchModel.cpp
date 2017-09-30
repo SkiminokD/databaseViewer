@@ -98,7 +98,7 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
                 PRINT_CRITICAL(query.first.executedQuery());
                 return QVariant();
             }
-            m_cache.enqueue(query);
+            m_cache.append(query);
             rowQuery = m_cache.end();
             --rowQuery;
         }
