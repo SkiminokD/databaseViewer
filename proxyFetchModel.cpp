@@ -1,12 +1,13 @@
 #include "proxyFetchModel.h"
 #include "debug.h"
+#include <algorithm>
 
 ProxyFetchModel::ProxyFetchModel(QObject *parent)
     : QAbstractTableModel(parent),
-      m_db(QSqlDatabase::database("inobitec")),
-      m_lastQuery(QSqlQuery(m_db),-1)
+      m_db(QSqlDatabase::database("inobitec"))
 {
     select();
+    m_cache.setMaxSize(50);
 }
 
 ProxyFetchModel::~ProxyFetchModel()
@@ -84,20 +85,24 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
-        if(m_lastQuery.second != index.row())
+        auto rowQuery = std::find_if(m_cache.begin(), m_cache.end(),
+                        [index](auto object) { return object.second == index.row(); } );
+
+        if(rowQuery == m_cache.end())
         {
-            QSqlQuery query(m_db);
+            RowQuery query(QSqlQuery(m_db),index.row());
             QString request = "FETCH ABSOLUTE %0 FROM chcursor";
-            if(!query.exec(request.arg(index.row()+1)) || !query.first())
+            if(!query.first.exec(request.arg(index.row()+1)) || !query.first.first())
             {
-                PRINT_CRITICAL(query.lastError().text());
-                PRINT_CRITICAL(query.executedQuery());
+                PRINT_CRITICAL(query.first.lastError().text());
+                PRINT_CRITICAL(query.first.executedQuery());
                 return QVariant();
             }
-            m_lastQuery.first = query;
-            m_lastQuery.second = index.row();
+            m_cache.enqueue(query);
+            rowQuery = m_cache.end();
+            --rowQuery;
         }
-        return QVariant(m_lastQuery.first.value(index.column()));
+        return QVariant(rowQuery->first.value(index.column()));
     }
 
     return QVariant();

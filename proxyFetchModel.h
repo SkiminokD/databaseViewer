@@ -3,6 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QtSql>
+#include <cache.h>
 
 class ProxyFetchModel : public QAbstractTableModel
 {
@@ -50,7 +51,9 @@ private:
         };
     qint64 m_rowCount;
     QSqlDatabase m_db;
-    mutable QPair<QSqlQuery,int> m_lastQuery;
+
+    using RowQuery = QPair<QSqlQuery,int>;
+    mutable Cache<RowQuery> m_cache;
 protected:
     bool select();
 };
