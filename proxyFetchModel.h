@@ -53,7 +53,7 @@ private:
     QSqlDatabase m_db;
 
     using RowQuery = QPair<QSqlQuery,int>;
-    mutable Cache<RowQuery> m_cache;
+    mutable Cache<QSqlQuery> m_cache;
 protected:
     bool select();
 };
