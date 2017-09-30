@@ -12,6 +12,12 @@ public:
 protected:
     int m_maxSize {10};
 
+    using QQueue<T>::append;
+    using QQueue<T>::insert;
+    using QQueue<T>::operator +;
+    using QQueue<T>::operator +=;
+    using QQueue<T>::push_back;
+    using QQueue<T>::push_front;
 };
 
 template<class T>
