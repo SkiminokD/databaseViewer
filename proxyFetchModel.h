@@ -50,6 +50,7 @@ private:
         };
     qint64 m_rowCount;
     QSqlDatabase m_db;
+    mutable QPair<QSqlQuery,int> m_lastQuery;
 protected:
     bool select();
 };

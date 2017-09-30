@@ -2,9 +2,10 @@
 #include "debug.h"
 
 ProxyFetchModel::ProxyFetchModel(QObject *parent)
-    : QAbstractTableModel(parent)
+    : QAbstractTableModel(parent),
+      m_db(QSqlDatabase::database("inobitec")),
+      m_lastQuery(QSqlQuery(m_db),-1)
 {
-    m_db = QSqlDatabase::database("inobitec");
     select();
 }
 
@@ -83,18 +84,20 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
-        QSqlQuery query(m_db);
-        QString request = "FETCH ABSOLUTE %0 FROM chcursor";
-        if(!query.exec(request.arg(index.row()+1)))
+        if(m_lastQuery.second != index.row())
         {
-            PRINT_CRITICAL(query.lastError().text());
-            PRINT_CRITICAL(query.executedQuery());
-            return QVariant();
+            QSqlQuery query(m_db);
+            QString request = "FETCH ABSOLUTE %0 FROM chcursor";
+            if(!query.exec(request.arg(index.row()+1)) || !query.first())
+            {
+                PRINT_CRITICAL(query.lastError().text());
+                PRINT_CRITICAL(query.executedQuery());
+                return QVariant();
+            }
+            m_lastQuery.first = query;
+            m_lastQuery.second = index.row();
         }
-        if(query.first())
-        {
-            return QVariant(query.value(index.column()));
-        }
+        return QVariant(m_lastQuery.first.value(index.column()));
     }
 
     return QVariant();
