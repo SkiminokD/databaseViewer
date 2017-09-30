@@ -2,6 +2,7 @@
 #define PROXYFETCHMODEL_H
 
 #include <QAbstractTableModel>
+#include <QtSql>
 
 class ProxyFetchModel : public QAbstractTableModel
 {
@@ -47,6 +48,7 @@ private:
             {Column::LAST_START_TIME,tr("Последнее время запуска")}
         };
     qint64 m_rowCount;
+    QSqlDatabase m_db;
 protected:
     bool select();
 };

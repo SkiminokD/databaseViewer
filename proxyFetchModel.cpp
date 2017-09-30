@@ -1,17 +1,16 @@
 #include "proxyFetchModel.h"
-#include <QtSql>
 #include "debug.h"
 
 ProxyFetchModel::ProxyFetchModel(QObject *parent)
     : QAbstractTableModel(parent)
 {
+    m_db = QSqlDatabase::database("inobitec");
     select();
 }
 
 bool ProxyFetchModel::select()
 {
-    QSqlDatabase db = QSqlDatabase::database("inobitec");
-    QSqlQuery query(db);
+    QSqlQuery query(m_db);
     if(!query.exec("SELECT count(*) FROM channels"))
     {
         PRINT_CRITICAL(query.lastError().text());
