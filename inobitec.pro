@@ -39,7 +39,8 @@ HEADERS += \
     	proxyFetchModel.h \
         channelTableView.h \
         authentication.h \
-        debug.h
+        debug.h \
+        cache.h
 
 FORMS += \
         mainwindow.ui \
