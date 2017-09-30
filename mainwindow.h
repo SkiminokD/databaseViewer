@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "channelTableModel.h"
+#include "proxyFetchModel.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,7 +18,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    ChannelTableModel *model;
+    ProxyFetchModel *model;
 };
 
 #endif // MAINWINDOW_H

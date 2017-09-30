@@ -28,6 +28,7 @@ SOURCES += \
         mainwindow.cpp \
         database.cpp \
         channelTableModel.cpp \
+    	proxyFetchModel.cpp \
         channelTableView.cpp \
         authentication.cpp
 
@@ -35,6 +36,7 @@ HEADERS += \
         mainwindow.h \
         database.h \
         channelTableModel.h \
+    	proxyFetchModel.h \
         channelTableView.h \
         authentication.h \
         debug.h
