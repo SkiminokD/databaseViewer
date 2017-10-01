@@ -19,12 +19,14 @@ public:
     void setModel(QAbstractItemModel *model, int idColumn);
 private:
     Ui::ChannelTableView *ui;
+    void resizeEvent(QResizeEvent *event) override;
 protected slots:
     void handleRemoveButtonClick();
 public:
 signals:
     void addDefaultRow();
     void removeRow(int index);
+    void viewResized(int rowShowed);
 };
 
 #endif // CHANNELTABLEVIEW_H

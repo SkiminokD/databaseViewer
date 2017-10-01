@@ -1,6 +1,7 @@
 #include "channelTableView.h"
 #include "ui_channelTableView.h"
 #include <QSqlRelationalDelegate>
+#include <QTableView>
 
 ChannelTableView::ChannelTableView(QWidget *parent) :
     QWidget(parent),
@@ -34,6 +35,13 @@ void ChannelTableView::setModel(QAbstractItemModel *model, int idColumn)
 
     connect(model,&QAbstractItemModel::rowsInserted,
             ui->tableView, &QTableView::scrollToBottom);
+}
+
+void ChannelTableView::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    emit viewResized(ui->tableView->height() / ui->tableView->rowHeight(0));
 }
 
 void ChannelTableView::handleRemoveButtonClick()
