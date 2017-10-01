@@ -15,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
      *       ChannelTableModel, переместить код connect в ChannelTableView::setModel */
     connect(ui->view,&ChannelTableView::addDefaultRow,
             [&] () { model->insertRow(0); });
-    /*connect(ui->view,&ChannelTableView::removeRow,
-            model,&ChannelTableModel::removeRowImmediately);*/
+    connect(ui->view,&ChannelTableView::removeRow,
+            [&] (int index) { model->removeRow(index); });
 }
 
 MainWindow::~MainWindow()

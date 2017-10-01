@@ -145,6 +145,29 @@ bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
+bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    beginRemoveRows(parent, row, row + count - 1);
+    int startId = m_cache[row].value(0).toInt();
+    QSqlQuery query(m_db);
+    QString request = "DELETE FROM channels WHERE id = :id";
+    for(int i=0; i<count; ++i)
+    {
+        m_cache.remove(row+i);
+        query.prepare(request);
+        query.bindValue(":id", i+startId);
+        if(!query.exec())
+        {
+            PRINT_CRITICAL(query.lastError().text());
+        }
+    }
+    m_rowCount-=count;
+    closeCursor();
+    createCursor();
+    endRemoveRows();
+    return true;
+}
+
 int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 {
     return static_cast<int>(m_headers.key(fieldName));

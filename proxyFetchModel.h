@@ -33,6 +33,10 @@ public:
     bool insertRows(int row, int count,
                     const QModelIndex &parent = QModelIndex()) override;
 
+    // Remove data:
+    bool removeRows(int row, int count,
+                    const QModelIndex &parent = QModelIndex()) override;
+
     int fieldIndex(const QString &fieldName) const;
 
     enum class Column : quint32
