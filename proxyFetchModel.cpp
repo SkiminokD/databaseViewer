@@ -123,6 +123,28 @@ Qt::ItemFlags ProxyFetchModel::flags(const QModelIndex &index) const
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
 }
 
+bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
+{
+    if(row!=0 && row !=rowCount(parent))
+        return false;
+    beginInsertRows(parent, row, row + count - 1);
+    QSqlQuery query(m_db);
+    for(int i=0; i<count; ++i)
+    {
+        QString request = "INSERT INTO channels DEFAULT VALUES";
+        query.prepare(request);
+        if(!query.exec())
+        {
+            PRINT_CRITICAL("Insert error:"+query.lastError().text());
+        }
+    }
+    m_rowCount+=count;
+    closeCursor();
+    createCursor();
+    endInsertRows();
+    return true;
+}
+
 int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 {
     return static_cast<int>(m_headers.key(fieldName));

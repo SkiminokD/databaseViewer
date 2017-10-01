@@ -29,6 +29,10 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
+    // Add data:
+    bool insertRows(int row, int count,
+                    const QModelIndex &parent = QModelIndex()) override;
+
     int fieldIndex(const QString &fieldName) const;
 
     enum class Column : quint32
