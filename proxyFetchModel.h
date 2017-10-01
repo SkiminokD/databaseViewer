@@ -54,6 +54,9 @@ private:
 
     using RowQuery = QPair<QSqlQuery,int>;
     mutable Cache<QSqlQuery> m_cache;
+
+    bool createCursor();
+    bool closeCursor();
 protected:
     bool select();
 };

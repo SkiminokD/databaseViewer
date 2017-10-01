@@ -12,15 +12,7 @@ ProxyFetchModel::ProxyFetchModel(QObject *parent)
 
 ProxyFetchModel::~ProxyFetchModel()
 {
-    QSqlQuery query(m_db);
-    if(!query.exec("CLOSE chcursor"))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-    }
-    if(!query.exec("COMMIT WORK"))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-    }
+    closeCursor();
 }
 
 bool ProxyFetchModel::select()
@@ -35,15 +27,7 @@ bool ProxyFetchModel::select()
     {
         m_rowCount = query.value(0).toLongLong();
     }
-    if(!query.exec("BEGIN WORK"))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-    }
-    if(!query.exec("DECLARE chcursor SCROLL CURSOR FOR "
-                   "SELECT * FROM channels ORDER BY id"))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-    }
+    createCursor();
     return true;
 }
 
@@ -109,4 +93,33 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
 int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 {
     return static_cast<int>(m_headers.key(fieldName));
+}
+
+bool ProxyFetchModel::createCursor()
+{
+    QSqlQuery query(m_db);
+    if(!query.exec("BEGIN WORK"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return false;
+    }
+    if(!query.exec("DECLARE chcursor SCROLL CURSOR FOR "
+                   "SELECT * FROM channels ORDER BY id"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return false;
+    }
+}
+
+bool ProxyFetchModel::closeCursor()
+{
+    QSqlQuery query(m_db);
+    if(!query.exec("CLOSE chcursor"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+    }
+    if(!query.exec("COMMIT WORK"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+    }
 }
