@@ -135,22 +135,20 @@ bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, i
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
     if (data(index, role) != value) {
-        QSqlRecord rec = m_cache[index.row()].record();
-        m_cache.remove(index.row());
-
         QSqlQuery query(m_db);
         query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE \"%3\" = :id ")
                                         .arg(m_tableName)
-                                        .arg(rec.fieldName(index.column()))
+                                        .arg(m_columns[index.column()].first)
                                         .arg(m_primaryKey.second));
         query.bindValue(":value",value);
-        query.bindValue(":id",rec.value(m_primaryKey.first));
+        query.bindValue(":id",m_cache[index.row()].value(m_primaryKey.first));
         if(!query.exec())
         {
             PRINT_CRITICAL(query.lastError().text());
             PRINT_CRITICAL(query.executedQuery());
             return false;
         }
+        m_cache.remove(index.row());
         closeCursor();
         createCursor();
         emit dataChanged(index, index, QVector<int>() << role);
