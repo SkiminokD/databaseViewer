@@ -199,7 +199,6 @@ bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
     for(int i=0; i<count; ++i)
     {
         int removableId = m_cache[row+i].value(m_primaryKey.first).toInt();
-        m_cache.remove(row+i);
         query.prepare(request);
         query.bindValue(":id", removableId);
         if(!query.exec())
@@ -207,6 +206,7 @@ bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
             PRINT_CRITICAL(query.lastError().text());
         }
     }
+    m_cache.removeAt(row);
     m_rowCount-=count;
     closeCursor();
     createCursor();

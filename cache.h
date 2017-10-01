@@ -9,6 +9,7 @@ class Cache : public QMap<int,T>
 public:
     void setMaxSize(int value);
     inline void append(const int &key, const T &t);
+    inline void removeAt(const int &key);
 protected:
     int m_maxSize {10};
 
@@ -41,6 +42,16 @@ void Cache<T>::append(const int &key, const T &t)
         QMap<int,T>::remove(remove);
     }
     QMap<int,T>::insert(key,t);
+}
+
+template<class T>
+void Cache<T>::removeAt(const int &key)
+{
+    if(!QMap<int,T>::contains(key))
+        return;
+    for(auto it = QMap<int,T>::keys().end(); (*it)!=key; --it)
+        QMap<int,T>::remove(*it);
+    QMap<int,T>::remove(key);
 }
 
 #endif // CACHE_H
