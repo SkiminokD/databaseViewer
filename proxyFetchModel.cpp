@@ -90,6 +90,39 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (data(index, role) != value) {
+        QSqlRecord rec = m_cache[index.row()].record();
+        m_cache.remove(index.row());
+
+        QSqlQuery query(m_db);
+        query.prepare(QString("UPDATE channels SET %1 = :value WHERE id = :id ")
+                                        .arg(rec.fieldName(index.column())));
+        query.bindValue(":value",value);
+        query.bindValue(":id",rec.value(0));
+        if(!query.exec())
+        {
+            PRINT_CRITICAL(query.lastError().text());
+            PRINT_CRITICAL(query.executedQuery());
+            return false;
+        }
+        closeCursor();
+        createCursor();
+        emit dataChanged(index, index, QVector<int>() << role);
+        return true;
+    }
+    return false;
+}
+
+Qt::ItemFlags ProxyFetchModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
+}
+
 int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 {
     return static_cast<int>(m_headers.key(fieldName));
