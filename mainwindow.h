@@ -19,6 +19,18 @@ public:
 private:
     Ui::MainWindow *ui;
     ProxyFetchModel *model;
+
+    const QVector<QPair<QString, QString>> m_headers =
+        {
+            {"id",           tr("ID Канала")},
+            {"name",         tr("Имя канала")},
+            {"address",      tr("Aдрес")},
+            {"protocol",     tr("Протокол")},
+            {"port",         tr("Порт")},
+            {"login",        tr("Логин")},
+            {"password",     tr("Пароль")},
+            {"lastStartTime",tr("Последнее время запуска")}
+        };
 };
 
 #endif // MAINWINDOW_H

@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     model = new ProxyFetchModel(this);
-    model->setTable("channels");
+    model->setColumns(m_headers);
     model->setTable("channels", "id");
     ui->view->setModel(model, model->primaryKeyFieldIndex());
 

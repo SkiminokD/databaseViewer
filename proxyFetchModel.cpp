@@ -28,6 +28,12 @@ QString ProxyFetchModel::tableName() const
     return m_tableName;
 }
 
+void ProxyFetchModel::setColumns(const QVector<QPair<QString, QString> > &columns)
+{
+    m_columns.clear();
+    m_columns = columns;
+}
+
 bool ProxyFetchModel::select()
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");

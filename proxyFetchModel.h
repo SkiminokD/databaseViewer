@@ -15,6 +15,7 @@ public:
 
     virtual void setTable(const QString &tableName, const QString &primaryKeyField);
     QString tableName() const;
+    void    setColumns(const QVector<QPair<QString,QString>>& columns);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation,
@@ -44,30 +45,7 @@ public:
     QString primaryKeyField() const;
     int     primaryKeyFieldIndex() const;
 
-    enum class Column : quint32
-    {
-        ID = 0,
-        NAME,
-        ADDRESS,
-        PORT,
-        PROTOCOL,
-        LOGIN,
-        PASSWORD,
-        LAST_START_TIME
-    };
-    Q_ENUM(Column)
 private:
-    const QMap<Column, QString> m_headers =
-        {
-            {Column::ID,           tr("ID Канала")},
-            {Column::NAME,         tr("Имя канала")},
-            {Column::ADDRESS,      tr("Aдрес")},
-            {Column::PORT,         tr("Порт")},
-            {Column::PROTOCOL,     tr("Протокол")},
-            {Column::LOGIN,        tr("Логин")},
-            {Column::PASSWORD,     tr("Пароль")},
-            {Column::LAST_START_TIME,tr("Последнее время запуска")}
-        };
     QVector<QPair<QString,QString>> m_columns;
     qint64 m_rowCount;
     QSqlDatabase m_db;
