@@ -52,8 +52,8 @@ private:
     QString m_tableName;
     QPair<int,QString> m_primaryKey;    //index + fieldName;
 
-    using RowQuery = QPair<QSqlQuery,int>;
-    mutable Cache<QSqlQuery> m_cache;
+    using QVariantVector = QVector<QVariant>;
+    mutable Cache<QVariantVector> m_cache;
 
     bool createCursor();
     bool closeCursor();
