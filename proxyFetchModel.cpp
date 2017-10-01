@@ -18,9 +18,9 @@ void ProxyFetchModel::setTable(const QString &tableName, const QString &primaryK
 {
     m_tableName = tableName;
     m_primaryKey.second = primaryKeyField;
-    select();
     if(m_columns.isEmpty())
         updateColumnsName();
+    select();
 }
 
 QString ProxyFetchModel::tableName() const
@@ -237,14 +237,21 @@ int ProxyFetchModel::primaryKeyFieldIndex() const
 bool ProxyFetchModel::createCursor()
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    Q_ASSERT_X(!m_columns.isEmpty(), "columns", "columns is empty");
+
     QSqlQuery query(m_db);
     if(!query.exec("BEGIN WORK"))
     {
         PRINT_CRITICAL(query.lastError().text());
         return false;
     }
+    QString columns;
+    for(auto column: m_columns)
+        columns+="\""+column.first+"\", ";
+    columns.chop(2);
     if(!query.exec(QString("DECLARE chcursor SCROLL CURSOR FOR "
-                           "SELECT * FROM \"%1\" ORDER BY \"%2\"")
+                           "SELECT %1 FROM \"%2\" ORDER BY \"%3\"")
+                           .arg(columns)
                            .arg(m_tableName)
                            .arg(m_primaryKey.second)))
     {
