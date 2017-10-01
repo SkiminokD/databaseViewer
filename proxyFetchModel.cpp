@@ -233,6 +233,11 @@ int ProxyFetchModel::primaryKeyFieldIndex() const
     return m_primaryKey.first;
 }
 
+void ProxyFetchModel::setCacheSize(const int &value)
+{
+    m_cache.setMaxSize(value);
+}
+
 bool ProxyFetchModel::createCursor()
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");

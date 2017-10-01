@@ -45,6 +45,8 @@ public:
     QString primaryKeyField() const;
     int     primaryKeyFieldIndex() const;
 
+    void setCacheSize(const int& value);
+
 private:
     QVector<QPair<QString,QString>> m_columns;
     qint64 m_rowCount;
