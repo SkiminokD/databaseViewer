@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
             [&] () { model->insertRow(0); });
     connect(ui->view,&ChannelTableView::removeRow,
             [&] (int index) { model->removeRow(index); });
+    connect(ui->view,&ChannelTableView::viewResized,
+            [&] (int rowShowed) { model->setCacheSize(2*rowShowed); });
 }
 
 MainWindow::~MainWindow()
