@@ -18,6 +18,8 @@ void ProxyFetchModel::setTable(const QString &tableName)
 {
     m_tableName = tableName;
     select();
+    if(m_columns.isEmpty())
+        updateColumnsName();
 }
 
 QString ProxyFetchModel::tableName() const
@@ -42,6 +44,25 @@ bool ProxyFetchModel::select()
     return true;
 }
 
+void ProxyFetchModel::updateColumnsName()
+{
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    QSqlQuery query(m_db);
+    if(!query.exec(QString("SELECT * FROM \"%1\" LIMIT 1").arg(m_tableName)))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return;
+    }
+    if(query.first())
+    {
+        QSqlRecord rec = query.record();
+        for(int i=0 ; i<rec.count(); ++i)
+        {
+            m_columns.append({rec.fieldName(i),rec.fieldName(i)});
+        }
+    }
+}
+
 QVariant ProxyFetchModel::headerData(int section,
                                      Qt::Orientation orientation,
                                      int role) const
@@ -49,7 +70,7 @@ QVariant ProxyFetchModel::headerData(int section,
     if (role == Qt::DisplayRole)
     {
         if(orientation == Qt::Horizontal)
-            return QVariant(m_headers.value(static_cast<Column>(section),""));
+            return QVariant(m_columns[section].second);
         if(orientation == Qt::Vertical)
             return QVariant(section+1);
     }
@@ -70,7 +91,7 @@ int ProxyFetchModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return m_headers.size();
+    return m_columns.size();
 }
 
 QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
@@ -185,7 +206,10 @@ bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
 
 int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 {
-    return static_cast<int>(m_headers.key(fieldName));
+    for(int i=0; i<m_columns.count(); ++i)
+        if(m_columns[i].first == fieldName)
+            return i;
+    return -1;
 }
 
 bool ProxyFetchModel::createCursor()

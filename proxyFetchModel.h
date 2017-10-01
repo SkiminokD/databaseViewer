@@ -66,6 +66,7 @@ private:
             {Column::PASSWORD,     tr("Пароль")},
             {Column::LAST_START_TIME,tr("Последнее время запуска")}
         };
+    QVector<QPair<QString,QString>> m_columns;
     qint64 m_rowCount;
     QSqlDatabase m_db;
     QString m_tableName;
@@ -77,6 +78,7 @@ private:
     bool closeCursor();
 protected:
     bool select();
+    void updateColumnsName();
 };
 
 #endif // PROXYFETCHMODEL_H
