@@ -123,7 +123,8 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
             QVariantVector vec(m_columns.size());
             for(int i=0; i<m_columns.size(); ++i)
                 vec[i] = query.value(i);
-            m_cache.append(index.row(), vec);
+            m_cache.append(index.row(), QVariantVector());
+            m_cache[index.row()].swap(vec);
         }
         return QVariant(m_cache[index.row()][index.column()]);
     }
