@@ -142,6 +142,7 @@ bool ProxyFetchModel::createCursor()
         PRINT_CRITICAL(query.lastError().text());
         return false;
     }
+    return true;
 }
 
 bool ProxyFetchModel::closeCursor()
@@ -150,9 +151,12 @@ bool ProxyFetchModel::closeCursor()
     if(!query.exec("CLOSE chcursor"))
     {
         PRINT_CRITICAL(query.lastError().text());
+        return false;
     }
     if(!query.exec("COMMIT WORK"))
     {
         PRINT_CRITICAL(query.lastError().text());
+        return false;
     }
+    return true;
 }
