@@ -109,7 +109,7 @@ bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, i
         m_cache.remove(index.row());
 
         QSqlQuery query(m_db);
-        query.prepare(QString("UPDATE \"%1\" SET %2 = :value WHERE id = :id ")
+        query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE id = :id ")
                                         .arg(m_tableName)
                                         .arg(rec.fieldName(index.column())));
         query.bindValue(":value",value);
