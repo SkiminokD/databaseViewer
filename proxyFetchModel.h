@@ -13,6 +13,9 @@ public:
     explicit ProxyFetchModel(QObject *parent = nullptr);
     virtual ~ProxyFetchModel();
 
+    virtual void setTable(const QString &tableName);
+    QString tableName() const;
+
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role = Qt::DisplayRole) const override;
@@ -65,6 +68,7 @@ private:
         };
     qint64 m_rowCount;
     QSqlDatabase m_db;
+    QString m_tableName;
 
     using RowQuery = QPair<QSqlQuery,int>;
     mutable Cache<QSqlQuery> m_cache;

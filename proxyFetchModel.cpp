@@ -6,7 +6,6 @@ ProxyFetchModel::ProxyFetchModel(QObject *parent)
     : QAbstractTableModel(parent),
       m_db(QSqlDatabase::database("inobitec"))
 {
-    select();
     m_cache.setMaxSize(50);
 }
 
@@ -15,10 +14,22 @@ ProxyFetchModel::~ProxyFetchModel()
     closeCursor();
 }
 
+void ProxyFetchModel::setTable(const QString &tableName)
+{
+    m_tableName = tableName;
+    select();
+}
+
+QString ProxyFetchModel::tableName() const
+{
+    return m_tableName;
+}
+
 bool ProxyFetchModel::select()
 {
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
     QSqlQuery query(m_db);
-    if(!query.exec("SELECT count(*) FROM channels"))
+    if(!query.exec(QString("SELECT count(*) FROM \"%1\"").arg(m_tableName)))
     {
         PRINT_CRITICAL(query.lastError().text());
         return false;
@@ -92,12 +103,14 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
 
 bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
     if (data(index, role) != value) {
         QSqlRecord rec = m_cache[index.row()].record();
         m_cache.remove(index.row());
 
         QSqlQuery query(m_db);
-        query.prepare(QString("UPDATE channels SET %1 = :value WHERE id = :id ")
+        query.prepare(QString("UPDATE \"%1\" SET %2 = :value WHERE id = :id ")
+                                        .arg(m_tableName)
                                         .arg(rec.fieldName(index.column())));
         query.bindValue(":value",value);
         query.bindValue(":id",rec.value(0));
@@ -125,13 +138,14 @@ Qt::ItemFlags ProxyFetchModel::flags(const QModelIndex &index) const
 
 bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
 {
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
     if(row!=0 && row !=rowCount(parent))
         return false;
     beginInsertRows(parent, row, row + count - 1);
     QSqlQuery query(m_db);
     for(int i=0; i<count; ++i)
     {
-        QString request = "INSERT INTO channels DEFAULT VALUES";
+        QString request = QString("INSERT INTO \"%1\" DEFAULT VALUES").arg(m_tableName);
         query.prepare(request);
         if(!query.exec())
         {
@@ -147,10 +161,11 @@ bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
 
 bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
 {
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
     beginRemoveRows(parent, row, row + count - 1);
     int startId = m_cache[row].value(0).toInt();
     QSqlQuery query(m_db);
-    QString request = "DELETE FROM channels WHERE id = :id";
+    QString request = QString("DELETE FROM \"%1\" WHERE id = :id").arg(m_tableName);
     for(int i=0; i<count; ++i)
     {
         m_cache.remove(row+i);
@@ -175,14 +190,16 @@ int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 
 bool ProxyFetchModel::createCursor()
 {
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
     QSqlQuery query(m_db);
     if(!query.exec("BEGIN WORK"))
     {
         PRINT_CRITICAL(query.lastError().text());
         return false;
     }
-    if(!query.exec("DECLARE chcursor SCROLL CURSOR FOR "
-                   "SELECT * FROM channels ORDER BY id"))
+    if(!query.exec(QString("DECLARE chcursor SCROLL CURSOR FOR "
+                           "SELECT * FROM \"%1\" ORDER BY id")
+                           .arg(m_tableName)))
     {
         PRINT_CRITICAL(query.lastError().text());
         return false;

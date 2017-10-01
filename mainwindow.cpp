@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     model = new ProxyFetchModel(this);
+    model->setTable("channels");
     ui->view->setModel(model, model->fieldIndex("id"));
 
     /* TODO: в случае более жесткой привязки ChannelTableView к интерфейсам моделей типа
