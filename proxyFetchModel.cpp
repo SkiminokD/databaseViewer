@@ -218,6 +218,16 @@ int ProxyFetchModel::fieldIndex(const QString &fieldName) const
     return -1;
 }
 
+QString ProxyFetchModel::primaryKeyField() const
+{
+    return m_primaryKey.second;
+}
+
+int ProxyFetchModel::primaryKeyFieldIndex() const
+{
+    return m_primaryKey.first;
+}
+
 bool ProxyFetchModel::createCursor()
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");

@@ -41,6 +41,8 @@ public:
                     const QModelIndex &parent = QModelIndex()) override;
 
     int fieldIndex(const QString &fieldName) const;
+    QString primaryKeyField() const;
+    int     primaryKeyFieldIndex() const;
 
     enum class Column : quint32
     {
