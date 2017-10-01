@@ -13,7 +13,7 @@ public:
     explicit ProxyFetchModel(QObject *parent = nullptr);
     virtual ~ProxyFetchModel();
 
-    virtual void setTable(const QString &tableName);
+    virtual void setTable(const QString &tableName, const QString &primaryKeyField);
     QString tableName() const;
 
     // Header:
@@ -70,6 +70,7 @@ private:
     qint64 m_rowCount;
     QSqlDatabase m_db;
     QString m_tableName;
+    QPair<int,QString> m_primaryKey;    //index + fieldName;
 
     using RowQuery = QPair<QSqlQuery,int>;
     mutable Cache<QSqlQuery> m_cache;

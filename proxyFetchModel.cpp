@@ -14,9 +14,10 @@ ProxyFetchModel::~ProxyFetchModel()
     closeCursor();
 }
 
-void ProxyFetchModel::setTable(const QString &tableName)
+void ProxyFetchModel::setTable(const QString &tableName, const QString &primaryKeyField)
 {
     m_tableName = tableName;
+    m_primaryKey.second = primaryKeyField;
     select();
     if(m_columns.isEmpty())
         updateColumnsName();
@@ -59,6 +60,8 @@ void ProxyFetchModel::updateColumnsName()
         for(int i=0 ; i<rec.count(); ++i)
         {
             m_columns.append({rec.fieldName(i),rec.fieldName(i)});
+            if(rec.fieldName(i) == m_primaryKey.second)
+                m_primaryKey.first = i;
         }
     }
 }
@@ -130,11 +133,12 @@ bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, i
         m_cache.remove(index.row());
 
         QSqlQuery query(m_db);
-        query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE id = :id ")
+        query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE \"%3\" = :id ")
                                         .arg(m_tableName)
-                                        .arg(rec.fieldName(index.column())));
+                                        .arg(rec.fieldName(index.column()))
+                                        .arg(m_primaryKey.second));
         query.bindValue(":value",value);
-        query.bindValue(":id",rec.value(0));
+        query.bindValue(":id",rec.value(m_primaryKey.first));
         if(!query.exec())
         {
             PRINT_CRITICAL(query.lastError().text());
@@ -184,14 +188,16 @@ bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
     beginRemoveRows(parent, row, row + count - 1);
-    int startId = m_cache[row].value(0).toInt();
     QSqlQuery query(m_db);
-    QString request = QString("DELETE FROM \"%1\" WHERE id = :id").arg(m_tableName);
+    QString request = QString("DELETE FROM \"%1\" WHERE \"%2\" = :id")
+                                                    .arg(m_tableName)
+                                                    .arg(m_primaryKey.second);
     for(int i=0; i<count; ++i)
     {
+        int removableId = m_cache[row+i].value(m_primaryKey.first).toInt();
         m_cache.remove(row+i);
         query.prepare(request);
-        query.bindValue(":id", i+startId);
+        query.bindValue(":id", removableId);
         if(!query.exec())
         {
             PRINT_CRITICAL(query.lastError().text());
@@ -222,8 +228,9 @@ bool ProxyFetchModel::createCursor()
         return false;
     }
     if(!query.exec(QString("DECLARE chcursor SCROLL CURSOR FOR "
-                           "SELECT * FROM \"%1\" ORDER BY id")
-                           .arg(m_tableName)))
+                           "SELECT * FROM \"%1\" ORDER BY \"%2\"")
+                           .arg(m_tableName)
+                           .arg(m_primaryKey.second)))
     {
         PRINT_CRITICAL(query.lastError().text());
         return false;
