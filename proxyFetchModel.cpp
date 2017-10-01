@@ -85,24 +85,22 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
-        auto rowQuery = std::find_if(m_cache.begin(), m_cache.end(),
-                        [index](auto object) { return object.second == index.row(); } );
-
-        if(rowQuery == m_cache.end())
+        QSqlQuery query;
+        if(m_cache.contains(index.row()))
+            query = m_cache.value(index.row());
+        else
         {
-            RowQuery query(QSqlQuery(m_db),index.row());
+            query = QSqlQuery(m_db);
             QString request = "FETCH ABSOLUTE %0 FROM chcursor";
-            if(!query.first.exec(request.arg(index.row()+1)) || !query.first.first())
+            if(!query.exec(request.arg(index.row()+1)) || !query.first())
             {
-                PRINT_CRITICAL(query.first.lastError().text());
-                PRINT_CRITICAL(query.first.executedQuery());
+                PRINT_CRITICAL(query.lastError().text());
+                PRINT_CRITICAL(query.executedQuery());
                 return QVariant();
             }
-            m_cache.append(query);
-            rowQuery = m_cache.end();
-            --rowQuery;
+            m_cache.append(index.row(), query);
         }
-        return QVariant(rowQuery->first.value(index.column()));
+        return QVariant(query.value(index.column()));
     }
 
     return QVariant();

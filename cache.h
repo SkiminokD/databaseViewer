@@ -1,22 +1,20 @@
 #ifndef CACHE_H
 #define CACHE_H
 
-#include <QList>
+#include <QMap>
 
 template <class T>
-class Cache : public QList<QPair<T,int>>
+class Cache : public QMap<int,T>
 {
 public:
     void setMaxSize(int value);
-    inline void append(const QPair<T,int> &t);
+    inline void append(const int &key, const T &t);
 protected:
     int m_maxSize {10};
 
-    using QList<QPair<T,int>>::insert;
-    using QList<QPair<T,int>>::operator +;
-    using QList<QPair<T,int>>::operator +=;
-    using QList<QPair<T,int>>::push_back;
-    using QList<QPair<T,int>>::push_front;
+    using QMap<int,T>::insert;
+    using QMap<int,T>::insertMulti;
+    using QMap<int,T>::unite;
 };
 
 template<class T>
@@ -26,26 +24,23 @@ void Cache<T>::setMaxSize(int value)
 }
 
 template<class T>
-void Cache<T>::append(const QPair<T,int> &t)
+void Cache<T>::append(const int &key, const T &t)
 {
-    if(QList<QPair<T,int>>::isEmpty())
+    if(QMap<int,T>::isEmpty())
     {
-        QList<QPair<T,int>>::append(t);
+        QMap<int,T>::insert(key,t);
         return;
     }
 
-    int distanceFront = abs(t.second - QList<QPair<T,int>>::first().second);
-    int distanceBack = abs(t.second - QList<QPair<T,int>>::last().second);
-
-    if(QList<QPair<T,int>>::size()+1 > m_maxSize)
+    if(QMap<int,T>::size()+1 > m_maxSize)
     {
-        auto remove = distanceFront > distanceBack ? &QList<QPair<T,int>>::takeFirst :
-                                                     &QList<QPair<T,int>>::takeLast;
-        (this->*remove)();
+        int distanceFront = abs(key - QMap<int,T>::firstKey());
+        int distanceBack = abs(key - QMap<int,T>::lastKey());
+        auto remove = distanceFront > distanceBack ? QMap<int,T>::firstKey() :
+                                                     QMap<int,T>::lastKey();
+        QMap<int,T>::remove(remove);
     }
-    auto append = distanceFront > distanceBack ? &QList<QPair<T,int>>::push_back :
-                                                 &QList<QPair<T,int>>::push_front;
-    (this->*append)(t);
+    QMap<int,T>::insert(key,t);
 }
 
 #endif // CACHE_H
