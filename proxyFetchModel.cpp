@@ -31,7 +31,12 @@ QString ProxyFetchModel::tableName() const
 void ProxyFetchModel::setColumns(const QVector<QPair<QString, QString> > &columns)
 {
     m_columns.clear();
-    m_columns = columns;
+    m_headers.clear();
+    for(auto column: columns)
+    {
+        m_columns.push_back(column.first);
+        m_headers.push_back(column.second);
+    }
 }
 
 bool ProxyFetchModel::select()
@@ -64,23 +69,19 @@ void ProxyFetchModel::updateColumnsName()
     {
         QSqlRecord rec = query.record();
         for(int i=0 ; i<rec.count(); ++i)
-        {
-            m_columns.append({rec.fieldName(i),rec.fieldName(i)});
-        }
+            m_columns.push_back(rec.fieldName(i));
     }
 }
 
 void ProxyFetchModel::setPrimaryKey(const QString &primaryKeyField)
 {
     m_primaryKey.second = primaryKeyField;
-    for(int i=0; i<m_columns.count(); ++i)
-        if(m_columns[i].first == m_primaryKey.second)
-        {
-            m_primaryKey.first = i;
-            return;
-        }
-    PRINT_CRITICAL("Primary key not found!");
-    Q_ASSERT_X(0, "pkey", "primary key not found");
+    m_primaryKey.first = m_columns.indexOf(primaryKeyField);
+    if(m_primaryKey.first == -1)
+    {
+        PRINT_CRITICAL("Primary key not found!");
+        Q_ASSERT_X(0, "pkey", "primary key not found");
+    }
 }
 
 QVariant ProxyFetchModel::headerData(int section,
@@ -90,7 +91,7 @@ QVariant ProxyFetchModel::headerData(int section,
     if (role == Qt::DisplayRole)
     {
         if(orientation == Qt::Horizontal)
-            return QVariant(m_columns[section].second);
+            return QVariant(m_headers[section]);
         if(orientation == Qt::Vertical)
             return QVariant(section+1);
     }
@@ -150,7 +151,7 @@ bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, i
         QSqlQuery query(m_db);
         query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE \"%3\" = :id ")
                                         .arg(m_tableName)
-                                        .arg(m_columns[index.column()].first)
+                                        .arg(m_columns[index.column()])
                                         .arg(m_primaryKey.second));
         query.bindValue(":value",value);
         query.bindValue(":id",m_cache[index.row()].value(m_primaryKey.first));
@@ -228,10 +229,7 @@ bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
 
 int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 {
-    for(int i=0; i<m_columns.count(); ++i)
-        if(m_columns[i].first == fieldName)
-            return i;
-    return -1;
+    return m_columns.indexOf(fieldName);
 }
 
 QString ProxyFetchModel::primaryKeyField() const
@@ -269,7 +267,7 @@ bool ProxyFetchModel::createCursor()
     }
     QString columns;
     for(auto column: m_columns)
-        columns+="\""+column.first+"\", ";
+        columns+="\""+column+"\", ";
     columns.chop(2);
     if(!query.exec(QString("DECLARE chcursor SCROLL CURSOR FOR "
                            "SELECT %1 FROM \"%2\" ORDER BY \"%3\"")

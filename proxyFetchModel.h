@@ -54,7 +54,8 @@ public:
     void setCacheSize(const int& value);
 
 private:
-    QVector<QPair<QString,QString>> m_columns;  //fieldName + showedName
+    QVector<QString> m_headers;
+    QVector<QString> m_columns;
     qint64 m_rowCount;
     QSqlDatabase m_db;
     QString m_tableName;
