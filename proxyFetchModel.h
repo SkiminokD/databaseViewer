@@ -60,10 +60,6 @@ private:
 
     using QVariantVector = QVector<QVariant>;
     mutable Cache<QVariantVector> m_cache;
-
-protected:
-    bool select();
-    void setPrimaryKey(const QString &primaryKeyField);
 };
 
 #endif // PROXYFETCHMODEL_H

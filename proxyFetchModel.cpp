@@ -19,8 +19,9 @@ void ProxyFetchModel::setTable(const QString &tableName, const QString &primaryK
     m_table->setTable(tableName);
     if(!m_table->columnsCount())
         m_table->updateColumnsName();
-    setPrimaryKey(primaryKeyField);
-    select();
+    m_table->setPrimaryKey(primaryKeyField);
+    m_rowCount = m_table->selectRowCount();
+    m_table->createCursor();
 }
 
 QString ProxyFetchModel::tableName() const
@@ -37,18 +38,6 @@ void ProxyFetchModel::setColumns(const QVector<QPair<QString, QString> > &column
         m_table->addColumn(column.first);
         m_headers.push_back(column.second);
     }
-}
-
-bool ProxyFetchModel::select()
-{
-    m_rowCount = m_table->selectRowCount();
-    bool res = m_table->createCursor();
-    return (m_rowCount && res);
-}
-
-void ProxyFetchModel::setPrimaryKey(const QString &primaryKeyField)
-{
-    m_table->setPrimaryKey(primaryKeyField);
 }
 
 QVariant ProxyFetchModel::headerData(int section,
