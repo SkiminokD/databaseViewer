@@ -2,8 +2,8 @@
 #define PROXYFETCHMODEL_H
 
 #include <QAbstractTableModel>
-#include <QtSql>
 #include <cache.h>
+#include <databaseTable.h>
 
 /*!
  * \brief The ProxyFetchModel class
@@ -54,12 +54,10 @@ public:
     void setCacheSize(const int& value);
 
 private:
+    DatabaseTable   *m_table;
     QVector<QString> m_headers;
     QVector<QString> m_columns;
     qint64 m_rowCount;
-    QSqlDatabase m_db;
-    QString m_tableName;
-    QPair<int,QString> m_primaryKey;    //index + fieldName;
 
     using QVariantVector = QVector<QVariant>;
     mutable Cache<QVariantVector> m_cache;

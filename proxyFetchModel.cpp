@@ -3,20 +3,21 @@
 #include <algorithm>
 
 ProxyFetchModel::ProxyFetchModel(QObject *parent)
-    : QAbstractTableModel(parent),
-      m_db(QSqlDatabase::database("inobitec"))
+    : QAbstractTableModel(parent)
 {
     m_cache.setMaxSize(50);
+    m_table = new DatabaseTable(this);
 }
 
 ProxyFetchModel::~ProxyFetchModel()
 {
     closeCursor();
+    delete m_table;
 }
 
 void ProxyFetchModel::setTable(const QString &tableName, const QString &primaryKeyField)
 {
-    m_tableName = tableName;
+    m_table->setTable(tableName);
     if(m_columns.isEmpty())
         updateColumnsName();
     setPrimaryKey(primaryKeyField);
@@ -25,7 +26,7 @@ void ProxyFetchModel::setTable(const QString &tableName, const QString &primaryK
 
 QString ProxyFetchModel::tableName() const
 {
-    return m_tableName;
+    return m_table->tableName();
 }
 
 void ProxyFetchModel::setColumns(const QVector<QPair<QString, QString> > &columns)
@@ -41,9 +42,9 @@ void ProxyFetchModel::setColumns(const QVector<QPair<QString, QString> > &column
 
 bool ProxyFetchModel::select()
 {
-    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
-    QSqlQuery query(m_db);
-    if(!query.exec(QString("SELECT count(*) FROM \"%1\"").arg(m_tableName)))
+    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
+    QSqlQuery query(m_table->database());
+    if(!query.exec(QString("SELECT count(*) FROM \"%1\"").arg(m_table->tableName())))
     {
         PRINT_CRITICAL(query.lastError().text());
         return false;
@@ -58,9 +59,9 @@ bool ProxyFetchModel::select()
 
 void ProxyFetchModel::updateColumnsName()
 {
-    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
-    QSqlQuery query(m_db);
-    if(!query.exec(QString("SELECT * FROM \"%1\" LIMIT 1").arg(m_tableName)))
+    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
+    QSqlQuery query(m_table->database());
+    if(!query.exec(QString("SELECT * FROM \"%1\" LIMIT 1").arg(m_table->tableName())))
     {
         PRINT_CRITICAL(query.lastError().text());
         return;
@@ -75,13 +76,7 @@ void ProxyFetchModel::updateColumnsName()
 
 void ProxyFetchModel::setPrimaryKey(const QString &primaryKeyField)
 {
-    m_primaryKey.second = primaryKeyField;
-    m_primaryKey.first = m_columns.indexOf(primaryKeyField);
-    if(m_primaryKey.first == -1)
-    {
-        PRINT_CRITICAL("Primary key not found!");
-        Q_ASSERT_X(0, "pkey", "primary key not found");
-    }
+    m_table->setPrimaryKey(m_columns.indexOf(primaryKeyField), primaryKeyField);
 }
 
 QVariant ProxyFetchModel::headerData(int section,
@@ -124,7 +119,7 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
     {
         if(!m_cache.contains(index.row()))
         {
-            QSqlQuery query = QSqlQuery(m_db);
+            QSqlQuery query = QSqlQuery(m_table->database());
             QString request = "FETCH ABSOLUTE %0 FROM chcursor";
             if(!query.exec(request.arg(index.row()+1)) || !query.first())
             {
@@ -146,15 +141,16 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
 
 bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
     if (data(index, role) != value) {
-        QSqlQuery query(m_db);
+        QSqlQuery query(m_table->database());
         query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE \"%3\" = :id ")
-                                        .arg(m_tableName)
+                                        .arg(m_table->tableName())
                                         .arg(m_columns[index.column()])
-                                        .arg(m_primaryKey.second));
+                                        .arg(m_table->primaryKeyField()));
         query.bindValue(":value",value);
-        query.bindValue(":id",m_cache[index.row()].value(m_primaryKey.first));
+        query.bindValue(":id",m_cache[index.row()].value(
+                                                    m_table->primaryKeyFieldIndex()));
         if(!query.exec())
         {
             PRINT_CRITICAL(query.lastError().text());
@@ -180,14 +176,15 @@ Qt::ItemFlags ProxyFetchModel::flags(const QModelIndex &index) const
 
 bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
 {
-    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
     if(row!=0 && row !=rowCount(parent))
         return false;
     beginInsertRows(parent, row, row + count - 1);
-    QSqlQuery query(m_db);
+    QSqlQuery query(m_table->database());
     for(int i=0; i<count; ++i)
     {
-        QString request = QString("INSERT INTO \"%1\" DEFAULT VALUES").arg(m_tableName);
+        QString request = QString("INSERT INTO \"%1\" DEFAULT VALUES")
+                                    .arg(m_table->tableName());
         query.prepare(request);
         if(!query.exec())
         {
@@ -203,15 +200,16 @@ bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
 
 bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
 {
-    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
     beginRemoveRows(parent, row, row + count - 1);
-    QSqlQuery query(m_db);
+    QSqlQuery query(m_table->database());
     QString request = QString("DELETE FROM \"%1\" WHERE \"%2\" = :id")
-                                                    .arg(m_tableName)
-                                                    .arg(m_primaryKey.second);
+                                                    .arg(m_table->tableName())
+                                                    .arg(m_table->primaryKeyField());
     for(int i=0; i<count; ++i)
     {
-        int removableId = m_cache[row+i].value(m_primaryKey.first).toInt();
+        int removableId = m_cache[row+i].value(m_table->primaryKeyFieldIndex())
+                                        .toInt();
         query.prepare(request);
         query.bindValue(":id", removableId);
         if(!query.exec())
@@ -234,12 +232,12 @@ int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 
 QString ProxyFetchModel::primaryKeyField() const
 {
-    return m_primaryKey.second;
+    return m_table->primaryKeyField();
 }
 
 int ProxyFetchModel::primaryKeyFieldIndex() const
 {
-    return m_primaryKey.first;
+    return m_table->primaryKeyFieldIndex();
 }
 
 void ProxyFetchModel::setCacheSize(const int &value)
@@ -256,10 +254,10 @@ void ProxyFetchModel::setCacheSize(const int &value)
  */
 bool ProxyFetchModel::createCursor()
 {
-    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
     Q_ASSERT_X(!m_columns.isEmpty(), "columns", "columns is empty");
 
-    QSqlQuery query(m_db);
+    QSqlQuery query(m_table->database());
     if(!query.exec("BEGIN WORK"))
     {
         PRINT_CRITICAL(query.lastError().text());
@@ -272,8 +270,8 @@ bool ProxyFetchModel::createCursor()
     if(!query.exec(QString("DECLARE chcursor SCROLL CURSOR FOR "
                            "SELECT %1 FROM \"%2\" ORDER BY \"%3\"")
                            .arg(columns)
-                           .arg(m_tableName)
-                           .arg(m_primaryKey.second)))
+                           .arg(m_table->tableName())
+                           .arg(m_table->primaryKeyField())))
     {
         PRINT_CRITICAL(query.lastError().text());
         return false;
@@ -290,7 +288,7 @@ bool ProxyFetchModel::createCursor()
  */
 bool ProxyFetchModel::closeCursor()
 {
-    QSqlQuery query(m_db);
+    QSqlQuery query(m_table->database());
     if(!query.exec("CLOSE chcursor"))
     {
         PRINT_CRITICAL(query.lastError().text());
