@@ -3,6 +3,12 @@
 
 #include <QMap>
 
+/*!
+ * \brief The Cache class
+ *
+ * The Cache class is a template class that provides a QMap-based dictionary with
+ * limited size.
+ */
 template <class T>
 class Cache : public QMap<int,T>
 {
@@ -24,6 +30,16 @@ void Cache<T>::setMaxSize(int value)
     m_maxSize = value;
 }
 
+/*!
+ * \brief Cache::append
+ *
+ * Append a new item with the key "key" and a value of "t".
+ * If the size of dictionary after operation is exceeded, the most distant item
+ * is removed.
+ *
+ * \param key - "key" value of the item to be added.
+ * \param t - value of the item to be added.
+ */
 template<class T>
 void Cache<T>::append(const int &key, const T &t)
 {

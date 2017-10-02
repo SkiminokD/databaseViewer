@@ -238,6 +238,13 @@ void ProxyFetchModel::setCacheSize(const int &value)
     m_cache.setMaxSize(value);
 }
 
+/*!
+ * \brief ProxyFetchModel::createCursor
+ *
+ * Starts transaction and create a new cursor to select item.
+ *
+ * \return true if success.
+ */
 bool ProxyFetchModel::createCursor()
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
@@ -265,6 +272,13 @@ bool ProxyFetchModel::createCursor()
     return true;
 }
 
+/*!
+ * \brief ProxyFetchModel::closeCursor
+ *
+ * Closes cursor and commit transaction
+ *
+ * \return true if success.
+ */
 bool ProxyFetchModel::closeCursor()
 {
     QSqlQuery query(m_db);

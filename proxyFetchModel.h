@@ -5,6 +5,12 @@
 #include <QtSql>
 #include <cache.h>
 
+/*!
+ * \brief The ProxyFetchModel class
+ *
+ * The ProxyFetchModel class provides an editable data model for a single database table
+ * with table content caching.
+ */
 class ProxyFetchModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -48,7 +54,7 @@ public:
     void setCacheSize(const int& value);
 
 private:
-    QVector<QPair<QString,QString>> m_columns;
+    QVector<QPair<QString,QString>> m_columns;  //fieldName + showedName
     qint64 m_rowCount;
     QSqlDatabase m_db;
     QString m_tableName;
