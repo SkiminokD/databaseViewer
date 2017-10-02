@@ -34,6 +34,7 @@ public:
     bool closeCursor();
     int  selectRowCount();
     bool selectRow(const int& index, QVariantVector& result);
+    bool updateRow(const int& index, const int& fieldIndex, const QVariant& value);
 protected:
     QSqlDatabase m_db;
     QString m_tableName;

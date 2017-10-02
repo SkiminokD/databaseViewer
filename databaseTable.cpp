@@ -183,3 +183,23 @@ bool DatabaseTable::selectRow(const int &index, QVariantVector &result)
         result[i] = query.value(i);
     return true;
 }
+
+bool DatabaseTable::updateRow(const int &index,
+                              const int &fieldIndex,
+                              const QVariant &value)
+{
+    QSqlQuery query(m_db);
+    query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE \"%3\" = :id ")
+                                    .arg(m_tableName)
+                                    .arg(m_columns[fieldIndex])
+                                    .arg(m_primaryKey.second));
+    query.bindValue(":value",value);
+    query.bindValue(":id",   index);
+    if(!query.exec())
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        PRINT_CRITICAL(query.executedQuery());
+        return false;
+    }
+    return true;
+}

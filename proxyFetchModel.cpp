@@ -96,20 +96,8 @@ bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, i
 {
     Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
     if (data(index, role) != value) {
-        QSqlQuery query(m_table->database());
-        query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE \"%3\" = :id ")
-                                        .arg(m_table->tableName())
-                                        .arg(m_table->column(index.column()))
-                                        .arg(m_table->primaryKeyField()));
-        query.bindValue(":value",value);
-        query.bindValue(":id",m_cache[index.row()].value(
-                                                    m_table->primaryKeyFieldIndex()));
-        if(!query.exec())
-        {
-            PRINT_CRITICAL(query.lastError().text());
-            PRINT_CRITICAL(query.executedQuery());
-            return false;
-        }
+        int pkey = m_cache[index.row()].value(m_table->primaryKeyFieldIndex()).toInt();
+        m_table->updateRow(pkey, index.column(), value);
         m_cache.remove(index.row());
         m_table->closeCursor();
         m_table->createCursor();
