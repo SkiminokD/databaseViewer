@@ -94,10 +94,10 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
 
 bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
     if (data(index, role) != value) {
         int pkey = m_cache[index.row()].value(m_table->primaryKeyFieldIndex()).toInt();
-        m_table->updateRow(pkey, index.column(), value);
+        if(!m_table->updateRow(pkey, index.column(), value))
+            return false;
         m_cache.remove(index.row());
         m_table->closeCursor();
         m_table->createCursor();
@@ -117,7 +117,6 @@ Qt::ItemFlags ProxyFetchModel::flags(const QModelIndex &index) const
 
 bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
 {
-    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
     if(row!=0 && row !=rowCount(parent))
         return false;
     beginInsertRows(parent, row, row + count - 1);

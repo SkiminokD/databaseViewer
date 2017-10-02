@@ -188,6 +188,7 @@ bool DatabaseTable::updateRow(const int &index,
                               const int &fieldIndex,
                               const QVariant &value)
 {
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
     QSqlQuery query(m_db);
     query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE \"%3\" = :id ")
                                     .arg(m_tableName)
