@@ -68,6 +68,7 @@ private:
 protected:
     bool select();
     void updateColumnsName();
+    void setPrimaryKey(const QString &primaryKeyField);
 };
 
 #endif // PROXYFETCHMODEL_H

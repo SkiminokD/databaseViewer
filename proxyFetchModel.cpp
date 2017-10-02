@@ -17,9 +17,9 @@ ProxyFetchModel::~ProxyFetchModel()
 void ProxyFetchModel::setTable(const QString &tableName, const QString &primaryKeyField)
 {
     m_tableName = tableName;
-    m_primaryKey.second = primaryKeyField;
     if(m_columns.isEmpty())
         updateColumnsName();
+    setPrimaryKey(primaryKeyField);
     select();
 }
 
@@ -70,6 +70,19 @@ void ProxyFetchModel::updateColumnsName()
                 m_primaryKey.first = i;
         }
     }
+}
+
+void ProxyFetchModel::setPrimaryKey(const QString &primaryKeyField)
+{
+    m_primaryKey.second = primaryKeyField;
+    for(int i=0; i<m_columns.count(); ++i)
+        if(m_columns[i].first == m_primaryKey.second)
+        {
+            m_primaryKey.first = i;
+            return;
+        }
+    PRINT_CRITICAL("Primary key not found!");
+    Q_ASSERT_X(0, "pkey", "primary key not found");
 }
 
 QVariant ProxyFetchModel::headerData(int section,
