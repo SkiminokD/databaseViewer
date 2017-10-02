@@ -66,8 +66,6 @@ void ProxyFetchModel::updateColumnsName()
         for(int i=0 ; i<rec.count(); ++i)
         {
             m_columns.append({rec.fieldName(i),rec.fieldName(i)});
-            if(rec.fieldName(i) == m_primaryKey.second)
-                m_primaryKey.first = i;
         }
     }
 }
