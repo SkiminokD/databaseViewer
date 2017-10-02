@@ -221,3 +221,20 @@ bool DatabaseTable::insertRows(const int& count)
     }
     return true;
 }
+
+bool DatabaseTable::removeRow(const int &index)
+{
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    QSqlQuery query(m_db);
+    QString request = QString("DELETE FROM \"%1\" WHERE \"%2\" = :id")
+                                                    .arg(m_tableName)
+                                                    .arg(m_primaryKey.second);
+    query.prepare(request);
+    query.bindValue(":id", index);
+    if(!query.exec())
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return false;
+    }
+    return true;
+}

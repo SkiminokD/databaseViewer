@@ -136,21 +136,15 @@ bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
 
 bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
 {
-    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
     beginRemoveRows(parent, row, row + count - 1);
-    QSqlQuery query(m_table->database());
-    QString request = QString("DELETE FROM \"%1\" WHERE \"%2\" = :id")
-                                                    .arg(m_table->tableName())
-                                                    .arg(m_table->primaryKeyField());
     for(int i=0; i<count; ++i)
     {
         int removableId = m_cache[row+i].value(m_table->primaryKeyFieldIndex())
                                         .toInt();
-        query.prepare(request);
-        query.bindValue(":id", removableId);
-        if(!query.exec())
+        if(!m_table->removeRow(removableId))
         {
-            PRINT_CRITICAL(query.lastError().text());
+            endRemoveRows();
+            return false;
         }
     }
     m_cache.removeAt(row);
