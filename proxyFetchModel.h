@@ -61,8 +61,6 @@ private:
     using QVariantVector = QVector<QVariant>;
     mutable Cache<QVariantVector> m_cache;
 
-    bool createCursor();
-    bool closeCursor();
 protected:
     bool select();
     void setPrimaryKey(const QString &primaryKeyField);

@@ -10,7 +10,7 @@ DatabaseTable::DatabaseTable(QObject *parent) :
 
 DatabaseTable::~DatabaseTable()
 {
-
+    closeCursor();
 }
 
 QSqlDatabase DatabaseTable::database() const
@@ -95,11 +95,59 @@ int DatabaseTable::columnIndex(const QString &column) const
     return m_columns.indexOf(column);
 }
 
-QString DatabaseTable::columnsToString()
+/*!
+ * \brief ProxyFetchModel::createCursor
+ *
+ * Starts transaction and create a new cursor to select item.
+ *
+ * \return true if success.
+ */
+bool DatabaseTable::createCursor()
 {
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    Q_ASSERT_X(columnsCount(), "columns", "columns is empty");
+
+    QSqlQuery query(m_db);
+    if(!query.exec("BEGIN WORK"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return false;
+    }
     QString columns;
     for(auto column: m_columns)
         columns+="\""+column+"\", ";
     columns.chop(2);
-    return columns;
+    if(!query.exec(QString("DECLARE chcursor SCROLL CURSOR FOR "
+                           "SELECT %1 FROM \"%2\" ORDER BY \"%3\"")
+                           .arg(columns)
+                           .arg(m_tableName)
+                           .arg(m_primaryKey.second)))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return false;
+    }
+    return true;
+}
+
+/*!
+ * \brief ProxyFetchModel::closeCursor
+ *
+ * Closes cursor and commit transaction
+ *
+ * \return true if success.
+ */
+bool DatabaseTable::closeCursor()
+{
+    QSqlQuery query(m_db);
+    if(!query.exec("CLOSE chcursor"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return false;
+    }
+    if(!query.exec("COMMIT WORK"))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return false;
+    }
+    return true;
 }

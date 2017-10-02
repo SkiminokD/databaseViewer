@@ -27,7 +27,9 @@ public:
     int     columnsCount() const;
     QString column(int index) const;
     int     columnIndex(const QString& column) const;
-    QString columnsToString();
+
+    bool createCursor();
+    bool closeCursor();
 protected:
     QSqlDatabase m_db;
     QString m_tableName;

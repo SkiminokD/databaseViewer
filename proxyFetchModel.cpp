@@ -11,7 +11,6 @@ ProxyFetchModel::ProxyFetchModel(QObject *parent)
 
 ProxyFetchModel::~ProxyFetchModel()
 {
-    closeCursor();
     delete m_table;
 }
 
@@ -53,7 +52,7 @@ bool ProxyFetchModel::select()
     {
         m_rowCount = query.value(0).toLongLong();
     }
-    createCursor();
+    m_table->createCursor();
     return true;
 }
 
@@ -141,8 +140,8 @@ bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, i
             return false;
         }
         m_cache.remove(index.row());
-        closeCursor();
-        createCursor();
+        m_table->closeCursor();
+        m_table->createCursor();
         emit dataChanged(index, index, QVector<int>() << role);
         return true;
     }
@@ -175,8 +174,8 @@ bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
         }
     }
     m_rowCount+=count;
-    closeCursor();
-    createCursor();
+    m_table->closeCursor();
+    m_table->createCursor();
     endInsertRows();
     return true;
 }
@@ -202,8 +201,8 @@ bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
     }
     m_cache.removeAt(row);
     m_rowCount-=count;
-    closeCursor();
-    createCursor();
+    m_table->closeCursor();
+    m_table->createCursor();
     endRemoveRows();
     return true;
 }
@@ -226,57 +225,4 @@ int ProxyFetchModel::primaryKeyFieldIndex() const
 void ProxyFetchModel::setCacheSize(const int &value)
 {
     m_cache.setMaxSize(value);
-}
-
-/*!
- * \brief ProxyFetchModel::createCursor
- *
- * Starts transaction and create a new cursor to select item.
- *
- * \return true if success.
- */
-bool ProxyFetchModel::createCursor()
-{
-    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
-    Q_ASSERT_X(m_table->columnsCount(), "columns", "columns is empty");
-
-    QSqlQuery query(m_table->database());
-    if(!query.exec("BEGIN WORK"))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-        return false;
-    }
-    if(!query.exec(QString("DECLARE chcursor SCROLL CURSOR FOR "
-                           "SELECT %1 FROM \"%2\" ORDER BY \"%3\"")
-                           .arg(m_table->columnsToString())
-                           .arg(m_table->tableName())
-                           .arg(m_table->primaryKeyField())))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-        return false;
-    }
-    return true;
-}
-
-/*!
- * \brief ProxyFetchModel::closeCursor
- *
- * Closes cursor and commit transaction
- *
- * \return true if success.
- */
-bool ProxyFetchModel::closeCursor()
-{
-    QSqlQuery query(m_table->database());
-    if(!query.exec("CLOSE chcursor"))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-        return false;
-    }
-    if(!query.exec("COMMIT WORK"))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-        return false;
-    }
-    return true;
 }
