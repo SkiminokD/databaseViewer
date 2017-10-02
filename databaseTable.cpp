@@ -151,3 +151,19 @@ bool DatabaseTable::closeCursor()
     }
     return true;
 }
+
+int DatabaseTable::selectRowCount()
+{
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    QSqlQuery query(m_db);
+    if(!query.exec(QString("SELECT count(*) FROM \"%1\"").arg(m_tableName)))
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        return 0;
+    }
+    if(query.first())
+    {
+        return query.value(0).toLongLong();
+    }
+    return 0;
+}

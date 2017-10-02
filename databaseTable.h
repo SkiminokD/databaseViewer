@@ -30,6 +30,7 @@ public:
 
     bool createCursor();
     bool closeCursor();
+    int  selectRowCount();
 protected:
     QSqlDatabase m_db;
     QString m_tableName;

@@ -41,19 +41,9 @@ void ProxyFetchModel::setColumns(const QVector<QPair<QString, QString> > &column
 
 bool ProxyFetchModel::select()
 {
-    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
-    QSqlQuery query(m_table->database());
-    if(!query.exec(QString("SELECT count(*) FROM \"%1\"").arg(m_table->tableName())))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-        return false;
-    }
-    if(query.first())
-    {
-        m_rowCount = query.value(0).toLongLong();
-    }
-    m_table->createCursor();
-    return true;
+    m_rowCount = m_table->selectRowCount();
+    bool res = m_table->createCursor();
+    return (m_rowCount && res);
 }
 
 void ProxyFetchModel::setPrimaryKey(const QString &primaryKeyField)
