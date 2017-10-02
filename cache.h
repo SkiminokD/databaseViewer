@@ -49,7 +49,8 @@ void Cache<T>::removeAt(const int &key)
 {
     if(!QMap<int,T>::contains(key))
         return;
-    for(auto it = QMap<int,T>::keys().end(); (*it)!=key; --it)
+    auto keys = QMap<int,T>::keys();
+    for(auto it = keys.end(); (*it)!=key; --it)
         QMap<int,T>::remove(*it);
     QMap<int,T>::remove(key);
 }
