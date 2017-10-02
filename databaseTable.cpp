@@ -203,3 +203,20 @@ bool DatabaseTable::updateRow(const int &index,
     }
     return true;
 }
+
+bool DatabaseTable::insertRows(const int& count)
+{
+    Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
+    QSqlQuery query(m_db);
+    for(int i=0; i<count; ++i)
+    {
+        QString request = QString("INSERT INTO \"%1\" DEFAULT VALUES").arg(m_tableName);
+        query.prepare(request);
+        if(!query.exec())
+        {
+            PRINT_CRITICAL("Insert error:"+query.lastError().text());
+            return false;
+        }
+    }
+    return true;
+}

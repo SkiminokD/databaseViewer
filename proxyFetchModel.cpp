@@ -121,20 +121,16 @@ bool ProxyFetchModel::insertRows(int row, int count, const QModelIndex &parent)
     if(row!=0 && row !=rowCount(parent))
         return false;
     beginInsertRows(parent, row, row + count - 1);
-    QSqlQuery query(m_table->database());
-    for(int i=0; i<count; ++i)
+
+    if(!m_table->insertRows(count))
     {
-        QString request = QString("INSERT INTO \"%1\" DEFAULT VALUES")
-                                    .arg(m_table->tableName());
-        query.prepare(request);
-        if(!query.exec())
-        {
-            PRINT_CRITICAL("Insert error:"+query.lastError().text());
-        }
+        endInsertRows();
+        return false;
     }
     m_rowCount+=count;
     m_table->closeCursor();
     m_table->createCursor();
+
     endInsertRows();
     return true;
 }
