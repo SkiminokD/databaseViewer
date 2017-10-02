@@ -16,13 +16,23 @@ public:
     void    setTable(const QString &tableName);
     QString tableName() const;
 
-    void    setPrimaryKey(const int& index, const QString& fieldName);
+    void    setPrimaryKey(const QString& fieldName);
     QString primaryKeyField() const;
     int     primaryKeyFieldIndex() const;
+
+    void    addColumn(const QString& column);
+    void    setColumns(const QVector<QString>& columns);
+    void    updateColumnsName();
+    void    clearColumns();
+    int     columnsCount() const;
+    QString column(int index) const;
+    int     columnIndex(const QString& column) const;
+    QString columnsToString();
 protected:
     QSqlDatabase m_db;
     QString m_tableName;
     QPair<int,QString> m_primaryKey;    //index + fieldName;
+    QVector<QString> m_columns;
 };
 
 #endif // DATABASETABLE_H

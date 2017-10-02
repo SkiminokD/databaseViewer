@@ -18,8 +18,8 @@ ProxyFetchModel::~ProxyFetchModel()
 void ProxyFetchModel::setTable(const QString &tableName, const QString &primaryKeyField)
 {
     m_table->setTable(tableName);
-    if(m_columns.isEmpty())
-        updateColumnsName();
+    if(!m_table->columnsCount())
+        m_table->updateColumnsName();
     setPrimaryKey(primaryKeyField);
     select();
 }
@@ -31,11 +31,11 @@ QString ProxyFetchModel::tableName() const
 
 void ProxyFetchModel::setColumns(const QVector<QPair<QString, QString> > &columns)
 {
-    m_columns.clear();
+    m_table->clearColumns();
     m_headers.clear();
     for(auto column: columns)
     {
-        m_columns.push_back(column.first);
+        m_table->addColumn(column.first);
         m_headers.push_back(column.second);
     }
 }
@@ -57,26 +57,9 @@ bool ProxyFetchModel::select()
     return true;
 }
 
-void ProxyFetchModel::updateColumnsName()
-{
-    Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
-    QSqlQuery query(m_table->database());
-    if(!query.exec(QString("SELECT * FROM \"%1\" LIMIT 1").arg(m_table->tableName())))
-    {
-        PRINT_CRITICAL(query.lastError().text());
-        return;
-    }
-    if(query.first())
-    {
-        QSqlRecord rec = query.record();
-        for(int i=0 ; i<rec.count(); ++i)
-            m_columns.push_back(rec.fieldName(i));
-    }
-}
-
 void ProxyFetchModel::setPrimaryKey(const QString &primaryKeyField)
 {
-    m_table->setPrimaryKey(m_columns.indexOf(primaryKeyField), primaryKeyField);
+    m_table->setPrimaryKey(primaryKeyField);
 }
 
 QVariant ProxyFetchModel::headerData(int section,
@@ -107,7 +90,7 @@ int ProxyFetchModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return m_columns.size();
+    return m_table->columnsCount();
 }
 
 QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
@@ -127,8 +110,8 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
                 PRINT_CRITICAL(query.executedQuery());
                 return QVariant();
             }
-            QVariantVector vec(m_columns.size());
-            for(int i=0; i<m_columns.size(); ++i)
+            QVariantVector vec(m_table->columnsCount());
+            for(int i=0; i<m_table->columnsCount(); ++i)
                 vec[i] = query.value(i);
             m_cache.append(index.row(), QVariantVector());
             m_cache[index.row()].swap(vec);
@@ -146,7 +129,7 @@ bool ProxyFetchModel::setData(const QModelIndex &index, const QVariant &value, i
         QSqlQuery query(m_table->database());
         query.prepare(QString("UPDATE \"%1\" SET \"%2\" = :value WHERE \"%3\" = :id ")
                                         .arg(m_table->tableName())
-                                        .arg(m_columns[index.column()])
+                                        .arg(m_table->column(index.column()))
                                         .arg(m_table->primaryKeyField()));
         query.bindValue(":value",value);
         query.bindValue(":id",m_cache[index.row()].value(
@@ -227,7 +210,7 @@ bool ProxyFetchModel::removeRows(int row, int count, const QModelIndex &parent)
 
 int ProxyFetchModel::fieldIndex(const QString &fieldName) const
 {
-    return m_columns.indexOf(fieldName);
+    return m_table->columnIndex(fieldName);
 }
 
 QString ProxyFetchModel::primaryKeyField() const
@@ -255,7 +238,7 @@ void ProxyFetchModel::setCacheSize(const int &value)
 bool ProxyFetchModel::createCursor()
 {
     Q_ASSERT_X(!m_table->tableName().isEmpty(), "tableName", "tableName is empty");
-    Q_ASSERT_X(!m_columns.isEmpty(), "columns", "columns is empty");
+    Q_ASSERT_X(m_table->columnsCount(), "columns", "columns is empty");
 
     QSqlQuery query(m_table->database());
     if(!query.exec("BEGIN WORK"))
@@ -263,13 +246,9 @@ bool ProxyFetchModel::createCursor()
         PRINT_CRITICAL(query.lastError().text());
         return false;
     }
-    QString columns;
-    for(auto column: m_columns)
-        columns+="\""+column+"\", ";
-    columns.chop(2);
     if(!query.exec(QString("DECLARE chcursor SCROLL CURSOR FOR "
                            "SELECT %1 FROM \"%2\" ORDER BY \"%3\"")
-                           .arg(columns)
+                           .arg(m_table->columnsToString())
                            .arg(m_table->tableName())
                            .arg(m_table->primaryKeyField())))
     {

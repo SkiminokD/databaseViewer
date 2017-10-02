@@ -56,7 +56,6 @@ public:
 private:
     DatabaseTable   *m_table;
     QVector<QString> m_headers;
-    QVector<QString> m_columns;
     qint64 m_rowCount;
 
     using QVariantVector = QVector<QVariant>;
@@ -66,7 +65,6 @@ private:
     bool closeCursor();
 protected:
     bool select();
-    void updateColumnsName();
     void setPrimaryKey(const QString &primaryKeyField);
 };
 
