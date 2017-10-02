@@ -58,7 +58,6 @@ private:
     QVector<QString> m_headers;
     qint64 m_rowCount;
 
-    using QVariantVector = QVector<QVariant>;
     mutable Cache<QVariantVector> m_cache;
 };
 

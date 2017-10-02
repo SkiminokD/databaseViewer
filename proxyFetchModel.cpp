@@ -80,17 +80,9 @@ QVariant ProxyFetchModel::data(const QModelIndex &index, int role) const
     {
         if(!m_cache.contains(index.row()))
         {
-            QSqlQuery query = QSqlQuery(m_table->database());
-            QString request = "FETCH ABSOLUTE %0 FROM chcursor";
-            if(!query.exec(request.arg(index.row()+1)) || !query.first())
-            {
-                PRINT_CRITICAL(query.lastError().text());
-                PRINT_CRITICAL(query.executedQuery());
+            QVariantVector vec;
+            if(!m_table->selectRow(index.row()+1, vec))
                 return QVariant();
-            }
-            QVariantVector vec(m_table->columnsCount());
-            for(int i=0; i<m_table->columnsCount(); ++i)
-                vec[i] = query.value(i);
             m_cache.append(index.row(), QVariantVector());
             m_cache[index.row()].swap(vec);
         }

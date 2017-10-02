@@ -167,3 +167,19 @@ int DatabaseTable::selectRowCount()
     }
     return 0;
 }
+
+bool DatabaseTable::selectRow(const int &index, QVariantVector &result)
+{
+    QSqlQuery query = QSqlQuery(m_db);
+    QString request = "FETCH ABSOLUTE %0 FROM chcursor";
+    if(!query.exec(request.arg(index)) || !query.first())
+    {
+        PRINT_CRITICAL(query.lastError().text());
+        PRINT_CRITICAL(query.executedQuery());
+        return false;
+    }
+    result.resize(m_columns.count());
+    for(int i=0; i<m_columns.count(); ++i)
+        result[i] = query.value(i);
+    return true;
+}

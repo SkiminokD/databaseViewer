@@ -4,6 +4,8 @@
 #include <QtSql>
 #include <QObject>
 
+using QVariantVector = QVector<QVariant>;
+
 class DatabaseTable : public QObject
 {
     Q_OBJECT
@@ -31,6 +33,7 @@ public:
     bool createCursor();
     bool closeCursor();
     int  selectRowCount();
+    bool selectRow(const int& index, QVariantVector& result);
 protected:
     QSqlDatabase m_db;
     QString m_tableName;
