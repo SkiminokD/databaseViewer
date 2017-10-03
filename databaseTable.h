@@ -6,6 +6,13 @@
 
 using QVariantVector = QVector<QVariant>;
 
+/*!
+ * \brief The DatabaseTable class
+ *
+ * This class provides functions for working with the specified database table.
+ *
+ * \todo Fix the pkey type. It must be QVariant.
+ */
 class DatabaseTable : public QObject
 {
     Q_OBJECT

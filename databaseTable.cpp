@@ -96,7 +96,7 @@ int DatabaseTable::columnIndex(const QString &column) const
 }
 
 /*!
- * \brief ProxyFetchModel::createCursor
+ * \brief DatabaseTable::createCursor
  *
  * Starts transaction and create a new cursor to select item.
  *
@@ -130,7 +130,7 @@ bool DatabaseTable::createCursor()
 }
 
 /*!
- * \brief ProxyFetchModel::closeCursor
+ * \brief DatabaseTable::closeCursor
  *
  * Closes cursor and commit transaction
  *
@@ -152,6 +152,13 @@ bool DatabaseTable::closeCursor()
     return true;
 }
 
+/*!
+ * \brief DatabaseTable::selectRowCount
+ *
+ * Selects count of rows from the table.
+ *
+ * \return if success the number of row for the current table, otherwise 0
+ */
 int DatabaseTable::selectRowCount()
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
@@ -168,6 +175,15 @@ int DatabaseTable::selectRowCount()
     return 0;
 }
 
+/*!
+ * \brief DatabaseTable::selectRow
+ *
+ * Select a specified row from the table.
+ *
+ * \param index - index of row for selecting
+ * \param result - variable for result
+ * \return true if success, otherwise false
+ */
 bool DatabaseTable::selectRow(const int &index, QVariantVector &result)
 {
     QSqlQuery query = QSqlQuery(m_db);
@@ -184,6 +200,16 @@ bool DatabaseTable::selectRow(const int &index, QVariantVector &result)
     return true;
 }
 
+/*!
+ * \brief DatabaseTable::updateRow
+ *
+ * Updates a specified field in the record whose pkey is "index"
+ *
+ * \param index - value of pkey
+ * \param fieldIndex - index of the target field
+ * \param value - value for setting
+ * \return true if success, otherwise false
+ */
 bool DatabaseTable::updateRow(const int &index,
                               const int &fieldIndex,
                               const QVariant &value)
@@ -205,6 +231,14 @@ bool DatabaseTable::updateRow(const int &index,
     return true;
 }
 
+/*!
+ * \brief DatabaseTable::insertRows
+ *
+ * Inserts several records into the table with a default value
+ *
+ * \param count - count of records for insert
+ * \return true if success, otherwise false
+ */
 bool DatabaseTable::insertRows(const int& count)
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
@@ -222,6 +256,14 @@ bool DatabaseTable::insertRows(const int& count)
     return true;
 }
 
+/*!
+ * \brief DatabaseTable::removeRow
+ *
+ * Removes a specified row from the table.
+ *
+ * \param index - value of pkey
+ * \return true if success, otherwise false
+ */
 bool DatabaseTable::removeRow(const int &index)
 {
     Q_ASSERT_X(!m_tableName.isEmpty(), "tableName", "tableName is empty");
